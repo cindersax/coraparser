@@ -14,7 +14,7 @@ class TableExtractor:
 
     async def extract(self, pdf_path: str):
         """
-        Extracts tables from a PDF file using the specified strategy, optionally using OCR if 'camelot-ocr' is selected.
+        Extracts tables from a PDF file using the specified strategy, optionally using cammetot with flavor lattice or stream and tabula.
 
         Parameters:
             pdf_path (str): The file path of the PDF from which to extract tables.
@@ -40,7 +40,7 @@ class TableExtractor:
             raise Exception(f"Failed to extract tables from PDF: {e}")
 
     async def _extract_with_camelot(self, pdf_path: str, use_lattice: bool):
-        """Extracts tables using Camelot, optionally using OCR."""
+        """Extracts tables using Camelot, optionally using lattice."""
         try:
                 flavor = "lattice" if use_lattice else "stream"
                 
