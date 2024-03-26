@@ -27,29 +27,43 @@ class TableExtractor:
             Exception: For errors during the extraction process.
         """
         try:
-            if self.strategy == "camelot":
-                return await self._extract_with_camelot(pdf_path, use_ocr=False)
+            if self.strategy == "camelot_stream":
+                return await self._extract_with_camelot(pdf_path, use_lattice=False)
             elif self.strategy == "tabula":
                 return await self._extract_with_tabula(pdf_path)
-            elif self.strategy == "camelot-ocr":
-                return await self._extract_with_camelot(pdf_path, use_ocr=True)
+            elif self.strategy == "camelot_lattice":
+                return await self._extract_with_camelot(pdf_path, use_lattice=True)
             else:
                 raise ValueError(f"Unsupported extraction strategy: {self.strategy}")
         except Exception as e:
             # This captures any exception during the table extraction process
             raise Exception(f"Failed to extract tables from PDF: {e}")
 
-    async def _extract_with_camelot(self, pdf_path: str, use_ocr: bool):
+    async def _extract_with_camelot(self, pdf_path: str, use_lattice: bool):
         """Extracts tables using Camelot, optionally using OCR."""
         try:
-            flavor = "lattice" if use_ocr else "stream"
-            tables = camelot.read_pdf(
-                pdf_path, pages="all", flavor=flavor, strip_text="\n",
-                **({"flag": "--use-ocr"} if use_ocr else {})  # Conditional parameter
-            )
-            return [table.df.values.tolist() for table in tables]
+                flavor = "lattice" if use_lattice else "stream"
+                
+                camelot_params = {
+                    "pages": "all",
+                    "flavor": flavor,
+                    "strip_text": "\n"
+                }
+                
+                if use_lattice:
+                    camelot_params.update({
+                        "process_background": True,
+                        "flag": "--use-lattice"
+                    })
+
+                tables = camelot.read_pdf(pdf_path, **camelot_params)
+                print(f"Extracting using flavor: {flavor}")
+                
+                return [table.df.values.tolist() for table in tables]
+
         except Exception as e:
-            raise Exception(f"Camelot{' OCR' if use_ocr else ''} failed to extract tables: {e}")
+                ocr_text = ' OCR' if use_lattice else ''
+                raise Exception(f"Camelot{ocr_text} failed to extract tables: {str(e)}")
 
     async def _extract_with_tabula(self, pdf_path: str):
         """Extracts tables using Tabula."""
