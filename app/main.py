@@ -54,9 +54,9 @@ async def extract_tables(request: PDFDownloadRequest):
     """
 
     pdf_downloader = PDFDownloader(strategy="httpx")
-    table_extractor = TableExtractor(strategy=request.extraction_method)
-    table_formatter = TableFormatter(strategy="simple")
-    output_formatter = OutputFormatter(output_dir=TABLES_DIR, file_type="json")
+    table_extractor = TableExtractor(strategy= request.extraction_method)
+    table_formatter = TableFormatter(strategy= request.table_formater ) 
+    output_formatter = OutputFormatter(output_dir=TABLES_DIR, file_type= request.output_formater )
 
     pdf_path = None
     try:
